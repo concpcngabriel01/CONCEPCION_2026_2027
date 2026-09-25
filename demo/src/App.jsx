@@ -3,6 +3,13 @@ import React, { useEffect, useState } from "react";
 export default function App() {
   const [count, setCount] = useState(0);
 
+    function handleNegativity() {
+    if (count > 0) {
+      setCount(count - 1);
+    }
+  }
+
+
   /* useState Syntax
   useEffect(() => {}, [])
   
@@ -33,7 +40,7 @@ export default function App() {
 
       <section className="flex gap-4">
         <button onClick={() => setCount(count + 1)} className="bg-green-600 w-12.5 flex items-center justify-center">+</button>
-        <button onClick={() => setCount(count - 1)} className="bg-red-600 w-12.5 flex items-center justify-center">-</button>
+        <button onClick={handleNegativity} className="bg-red-600 w-12.5 flex items-center justify-center">-</button>
       </section>
     </div>
   );
