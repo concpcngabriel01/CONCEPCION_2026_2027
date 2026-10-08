@@ -2,10 +2,11 @@
 
 button {
   cursor: pointer;
-  padding: 5px 8px;
+  border: solid 1px;
   border-radius: 7px;
+  padding: .3rem .5rem;
+}
 
-  /* y not? */
-  /* border: solid white 1px;
-  background-color: red; */
+input {
+  border: solid 1px;
 }

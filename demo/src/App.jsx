@@ -1,47 +1,64 @@
-import React, { useEffect, useState } from "react";
+// Required Imports
+import React from "react";
+import { useState } from "react";
 
+// Components and Assets
+import FormUser from "./components/FormUser";
+import Card from "./components/Card";
+
+// git clone {url} .
+// git switch session_8
+
+/* Ternary Operator
+Syntax:
+condition ? (if true) : (if false)
+counter > 0 ? (setCounter(counter - 1)) : stop
+*/
+
+/* DRY Principle (Don't Repeat Yourself)
+- Try to reuse codes as much as possible, instead of typing them again and again.
+*/
+
+/* Iterations
+> Loop inside a array.
+
+map
+foreach
+sort
+filter
+  Syntax
+    Array.filter((callback) => condition)
+    if a condition is true, return the callback
+
+  Example:
+    let students = ['marod', 'ian', 'dustin', 'greg']
+
+    let studentsWithFourName = students.filter(student => student.length > 3)
+
+    studentsWithFourName = ['marod', 'dustin', 'greg']
+find
+*/
 export default function App() {
-  const [count, setCount] = useState(0);
-
-    function handleNegativity() {
-    if (count > 0) {
-      setCount(count - 1);
-    }
-  }
-
-
-  /* useState Syntax
-  useEffect(() => {}, [])
-  
-  const [isVisible, setVisible] = useState(false)
-  
-  > If your are going to use a state that has no default value, use null instead of leaving it empty.
-  // const [userInput, setUserInput] = useState(null)
-
-  > If useState is imported
-  const [getter, setter] = useState(default value: Any)
-
-  > If useState is not import
-  const [getter, setter] = React.useState(default value: Any)
-
-  > The default value of a state can be any type
-    - number (decimal or int)
-    - str
-    - arr (List in python)
-    - obj (Dictionary in python)
-    - bool 
-    - etc...
-
-  */
+  const [users, setUsers] = useState([
+    {
+      username: "Frieren",
+      age: 1000,
+    },
+  ]);
 
   return (
-    <div className="min-h-screen bg-slate-800 text-white flex flex-col justify-center items-center gap-6 text-5xl">
-      <h1>Counter: {count} </h1>
+    <main className="min-h-screen text-white bg-slate-900 p-3 text-6xl">
+      <FormUser users={users} setUsers={setUsers} />
 
-      <section className="flex gap-4">
-        <button onClick={() => setCount(count + 1)} className="bg-green-600 w-12.5 flex items-center justify-center">+</button>
-        <button onClick={handleNegativity} className="bg-red-600 w-12.5 flex items-center justify-center">-</button>
-      </section>
-    </div>
+      {/* <Card user={users[0]} /> */}
+
+      {users.length > 0 ? (
+        users.map((user) => (
+          <Card user={user} setUsers={setUsers} users={users} />
+        ))
+      ) : (
+        <p>No Users</p>
+      )}
+    </main>
   );
 }
