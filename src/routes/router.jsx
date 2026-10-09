@@ -1,28 +1,32 @@
-import { createBrowserRouter } from "react-router";
-import Login from "../pages/Login";
+import { createBrowserRouter, Navigate } from "react-router";
 import App from "../App";
 import Dashboard from "../pages/Dashboard";
+import Hobby from "../pages/Hobby";
 import Profile from "../pages/Profile";
 
 export const routes = createBrowserRouter([
   {
-    // Landing Page
-    path: "",
-    element: <Login />,
+    path: "/",
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     path: "dashboard",
-    element: <App />,    // App will serve as a parent blueprint of our pages.
+    element: <App />, // App will serve as a parent blueprint of our pages.
     children: [
-        {
-            index: true,
-            element: <Dashboard /> 
-        },
-        {
-            path: "profile/:pk",
-            // <int:pk>/
-            element: <Profile />,
-        }
-    ]
-  }
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: "profile/:pk",
+        // <int:pk>/
+        element: <Profile />,
+      },
+      {
+        path: "hobby/:pk",
+        // <int:pk>/
+        element: <Hobby />,
+      },
+    ],
+  },
 ]);

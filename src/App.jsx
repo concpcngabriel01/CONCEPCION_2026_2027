@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { Link, Outlet } from "react-router";
 import PopupLogin from "./components/popups/PopupLogin";
 
 export default function App() {
-  const nav = useNavigate();
-
   const [isLoginVisible, setLoginVisible] = useState(false);
 
   return (
-    <main className="bg-slate-950 text-white min-h-screen">
+    <main className="min-h-screen bg-slate-950 text-white">
       {/* Header Navigation */}
       {isLoginVisible && (
         <PopupLogin
@@ -17,16 +15,16 @@ export default function App() {
         />
       )}
 
-      <header className="bg-slate-800 flex justify-between border-b">
-        <h1>APP Routing</h1>
+      <header className="flex items-center justify-between border-b border-slate-700 bg-slate-800 px-6 py-4">
+        <h1 className="m-0 text-xl font-bold">MY PORTFOLIO</h1>
 
-        <nav className="flex gap-3">
-          {/* <button onClick={() => nav('/')}>Login</button> */}
-          <button onClick={() => setLoginVisible(true)}>Login</button>
-          <button onClick={() => nav("/dashboard")}>Dashboard</button>
-          <button onClick={() => nav("/dashboard/profile/1")}>Frieren</button>
-          <button onClick={() => nav("/dashboard/profile/2")}>Fern</button>
-          <button onClick={() => nav("/dashboard/profile/3")}>Stark</button>
+        <nav aria-label="Main navigation">
+          <ul className="m-0 flex list-none gap-3 p-0">
+            <li><Link className="rounded px-3 py-2 text-white no-underline transition-colors duration-200 ease-in-out hover:bg-slate-700" to="/dashboard#about-me">About me</Link></li>
+            <li><Link className="rounded px-3 py-2 text-white no-underline transition-colors duration-200 ease-in-out hover:bg-slate-700" to="/dashboard/hobby/1">Billiards</Link></li>
+            <li><Link className="rounded px-3 py-2 text-white no-underline transition-colors duration-200 ease-in-out hover:bg-slate-700" to="/dashboard/hobby/2">Gym</Link></li>
+            <li><Link className="rounded px-3 py-2 text-white no-underline transition-colors duration-200 ease-in-out hover:bg-slate-700" to="/dashboard/hobby/3">Playing guitar</Link></li>
+          </ul>
         </nav>
       </header>
 
