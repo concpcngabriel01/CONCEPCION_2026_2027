@@ -1,22 +1,35 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
-
-import { Routes, Route, Navigate} from "react-router-dom";
-import login from "./pages/login.jsx";
-import Register from "./pages/Register.jsx";
-import Gallery from "./pages/Gallery.jsx";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { useAuth } from "./context/useAuth.js";
+import Gallery from "./pages/Gallery.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 
 function App() {
-  return(
+  const { token } = useAuth();
+
+  return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={<login />} />
+      <Route
+        path="/"
+        element={<Navigate to={token ? "/gallery" : "/login"} replace />}
+      />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+      <Route
+        path="/gallery"
+        element={
+          <ProtectedRoute>
+            <Gallery />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={<Navigate to={token ? "/gallery" : "/login"} replace />}
+      />
     </Routes>
-  )
+  );
 }
+
+export default App;

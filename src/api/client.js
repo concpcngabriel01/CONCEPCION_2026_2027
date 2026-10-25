@@ -1,36 +1,58 @@
-const BASE_URL = "http://127.0.0.1:8000/api";
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
+).replace(/\/+$/, "");
 
-async function request(method, url, body) {
-const token = localStorage.getItem("access");
-const res = await fetch(BASE_URL + url, {
-method,
-headers: {
-"Content-Type": "application/json",
-...(token && { Authorization: `Bearer ${token}` }),
-},
-body: body ? JSON.stringify(body) : undefined,
-});
+async function request(method, path, body) {
+  const token = localStorage.getItem("access");
+  const isFormData = body instanceof FormData;
+  const headers = {};
 
-const data = res.status === 204 ? null : await res.json().catch(() => null);
+  if (body !== undefined && !isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
-if (!res.ok) {
-if (res.status === 401 && token) {
-localStorage.removeItem("access");
-localStorage.removeItem("refresh");
-window.location.href = "/login";
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers,
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const data =
+    response.status === 204
+      ? null
+      : contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+  if (!response.ok) {
+    if (
+      response.status === 401 &&
+      token &&
+      path !== "/token/" &&
+      path !== "/token/refresh/"
+    ) {
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      window.location.assign("/login");
+    }
+
+    const error = new Error("The API request failed.");
+    error.response = { status: response.status, data };
+    throw error;
+  }
+
+  return data;
 }
-const error = new Error("Request failed");
-error.response = { status: res.status, data };
-throw error;
-}
 
-return { data };
-}
-
-export default {
-get: (url) => request("GET", url),
-post: (url, body) => request("POST", url, body),
-put: (url, body) => request("PUT", url, body),
-delete: (url) => request("DELETE", url),
+const api = {
+  get: (path) => request("GET", path),
+  post: (path, body) => request("POST", path, body),
+  patch: (path, body) => request("PATCH", path, body),
+  delete: (path) => request("DELETE", path),
 };
 
+export default api;

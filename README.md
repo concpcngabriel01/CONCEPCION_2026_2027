@@ -1,16 +1,26 @@
-# React + Vite
+# Pokédex React frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React and Vite frontend for the Django Pokédex API. User registration, login,
+and Pokémon CRUD operations all use the backend API.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Start the Django backend at `http://127.0.0.1:8000`.
+2. In this project folder, install dependencies and start Vite:
 
-## React Compiler
+   ```sh
+   npm ci
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. Open the local URL printed by Vite and register a trainer account.
 
-## Expanding the ESLint configuration
+The API defaults to `http://127.0.0.1:8000/api`. To use a different API URL,
+create a `.env.local` file in the project root and set:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```env
+VITE_API_URL=http://127.0.0.1:8000/api
+```
+
+The configured Django API must allow the frontend's origin through CORS. The
+provided backend allows all origins for this exam.
