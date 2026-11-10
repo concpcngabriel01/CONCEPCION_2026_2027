@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+:where(.store-shell) button,
+:where(.store-shell) a,
+:where(.store-shell) input,
+:where(.store-shell) select,
+:where(.store-shell) textarea {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sort-control {
+  position: relative;
+}
+
+.sort-trigger {
+  display: inline-flex;
+  min-width: 142px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #d6dfd5;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 70%);
+  padding: 9px 13px;
+  color: #526458;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 2px 8px rgb(52 75 58 / 4%);
+}
+
+.sort-trigger:hover,
+.sort-trigger[aria-expanded="true"] {
+  border-color: #aebfae;
+  background: #fff;
+  box-shadow: 0 5px 16px rgb(52 75 58 / 9%);
+}
+
+.sort-trigger:focus-visible,
+.sort-option:focus-visible {
+  outline: 2px solid #91a995;
+  outline-offset: 3px;
+}
+
+.sort-chevron {
+  width: 15px;
+  height: 15px;
+  color: #78857a;
+  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sort-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.sort-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  min-width: 100%;
+  overflow: hidden;
+  border: 1px solid #e0e6dd;
+  border-radius: 18px;
+  background: #fbfaf7;
+  padding: 5px;
+  box-shadow: 0 14px 36px rgb(37 52 42 / 14%);
+  transform-origin: top right;
+  animation: sort-menu-enter 160ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.sort-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 10px 11px;
+  color: #536558;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sort-option:hover,
+.sort-option[aria-checked="true"] {
+  background: #edf2eb;
+  color: #3e6047;
+}
+
+.sort-check {
+  color: #66836b;
+}
+
+@keyframes sort-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.store-dark {
+  background-color: #1c2620 !important;
+  color: #e6ece6 !important;
+}
+
+.store-dark header,
+.store-dark article,
+.store-dark [role="dialog"] {
+  background-color: #27342c !important;
+  border-color: #435348 !important;
+}
+
+.store-dark h1,
+.store-dark h2,
+.store-dark h3,
+.store-dark h4,
+.store-dark p,
+.store-dark span,
+.store-dark label,
+.store-dark a,
+.store-dark button:not(.checkoutButton) {
+  color: #e6ece6;
+}
+
+.store-dark [class*="bg-white"] {
+  background-color: #2d3b32 !important;
+}
+
+.store-dark [class*="border-[#"] {
+  border-color: #46564b !important;
+}
+
+.store-dark [class*="bg-[#f6f5f1]"],
+.store-dark [class*="bg-[#f8f8f3]"],
+.store-dark [class*="bg-[#fbfaf7]"] {
+  background-color: #27342c !important;
+}
+
+.store-dark [class*="text-[#91a995]"],
+.store-dark [class*="text-[#526c57]"],
+.store-dark [class*="text-[#45634d]"],
+.store-dark [class*="text-[#52765d]"] {
+  color: #b6d0bb !important;
+}
+
+.store-dark .store-search {
+  border-color: #53665a;
+  color: #c4d2c7;
+}
+
+.store-dark .store-search:focus-within {
+  border-color: #a8c9ae;
+}
+
+.store-search-input {
+  appearance: none;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.store-dark .store-search-input {
+  color: #e6ece6 !important;
+}
+
+.store-dark .store-search-input::placeholder {
+  color: #a0b0a4;
+  opacity: 1;
+}
+
+.store-dark input:not(.store-search-input),
+.store-dark select,
+.store-dark textarea {
+  background-color: #1f2a23 !important;
+  border-color: #53665a !important;
+  color: #e6ece6 !important;
+}
+
+.store-dark [class*="cardActionSecondary"] {
+  background-color: #34443a !important;
+  border-color: #53665a !important;
+  color: #dce8dd !important;
+}
+
+.store-dark .checkoutButton {
+  color: #fff !important;
+}
+
+.store-dark .sort-trigger {
+  border-color: #53665a;
+  background: #27342c;
+  color: #e6ece6;
+  box-shadow: none;
+}
+
+.store-dark .sort-trigger:hover,
+.store-dark .sort-trigger[aria-expanded="true"] {
+  border-color: #829b87;
+  background: #304036;
+  box-shadow: 0 5px 16px rgb(0 0 0 / 16%);
+}
+
+.store-dark .sort-menu {
+  border-color: #435348;
+  background: #27342c;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 30%);
+}
+
+.store-dark .sort-option {
+  color: #dce8dd;
+}
+
+.store-dark .sort-option:hover,
+.store-dark .sort-option[aria-checked="true"] {
+  background: #36483b;
+  color: #c9e0cd;
+}
+
+.store-dark .sort-check {
+  color: #b6d0bb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.store-shell) button,
+  :where(.store-shell) a,
+  :where(.store-shell) input,
+  :where(.store-shell) select,
+  :where(.store-shell) textarea,
+  .sort-chevron {
+    transition-duration: 0.01ms !important;
+  }
+
+  .sort-menu {
+    animation-duration: 0.01ms;
+  }
+}
