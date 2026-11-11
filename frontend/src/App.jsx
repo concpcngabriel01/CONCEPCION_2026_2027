@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AdminProducts from "./AdminProducts.jsx";
 
 const TOKEN_KEY = "living_space_token";
 const LEGACY_TOKEN_KEY = "northline_token";
@@ -233,7 +234,8 @@ function ThemeIcon({ darkMode }) {
 function App() {
   const [currentPage, setCurrentPage] = useState(() => (
     window.location.pathname === "/shop" ? "shop" :
-      window.location.pathname === "/checkout" ? "checkout" : "home"
+      window.location.pathname === "/checkout" ? "checkout" :
+        window.location.pathname === "/admin/products" ? "admin" : "home"
   ));
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState(PRODUCT_CATEGORIES);
@@ -287,7 +289,7 @@ function App() {
     if (category) setSelectedCategory(category);
     const path = page === "checkout"
       ? `/checkout${product ? `?buyNow=${encodeURIComponent(product.id)}` : ""}`
-      : page === "shop" ? "/shop" : "/";
+      : page === "shop" ? "/shop" : page === "admin" ? "/admin/products" : "/";
     if (window.location.pathname !== path) window.history.pushState({}, "", path);
     else if (window.location.href !== new URL(path, window.location.origin).href) {
       window.history.pushState({}, "", path);
@@ -375,7 +377,8 @@ function App() {
   useEffect(() => {
     const handleHistoryChange = () => {
       const path = window.location.pathname;
-      const page = path === "/shop" ? "shop" : path === "/checkout" ? "checkout" : "home";
+      const page = path === "/shop" ? "shop" : path === "/checkout" ? "checkout" :
+        path === "/admin/products" ? "admin" : "home";
       setCurrentPage(page);
       if (page === "checkout") {
         const productId = new URLSearchParams(window.location.search).get("buyNow");
@@ -834,7 +837,7 @@ function App() {
 
   const selectedPaymentMethodInfo = paymentMethods.find((method) => method.id === selectedPaymentMethod);
 
-  return (
+  return currentPage === "admin" ? <AdminProducts /> : (
     <div className={`${styles.siteShell} store-shell ${darkMode ? "store-dark" : ""}`}>
       <div className={styles.announcement}>
         <span>Thoughtful essentials for every Filipino home</span>
@@ -845,6 +848,7 @@ function App() {
         <nav className={styles.mainNav} aria-label="Main navigation">
           <button aria-current={currentPage === "home" ? "page" : undefined} className={currentPage === "home" ? "text-[#344b3b] max-[760px]:bg-[#dce8df]" : ""} onClick={() => navigateTo("home")} type="button">Home</button>
           <button aria-current={currentPage === "shop" ? "page" : undefined} className={currentPage === "shop" ? "text-[#344b3b] max-[760px]:bg-[#dce8df]" : ""} onClick={() => navigateTo("shop")} type="button">Shop</button>
+          <a className="text-[13px] text-[#5d6b60] hover:text-[#52765d]" href="/admin/products">Manage products</a>
         </nav>
         <div className={styles.headerActions}>
           <label className={styles.searchBox}>

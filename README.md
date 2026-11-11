@@ -54,6 +54,10 @@ requests to Django at `http://127.0.0.1:8000`.
   selected payment method are saved with the order, and customers can follow
   order and payment status.
 - Send a support message for staff to manage in Django admin.
+- Manage catalog products from the frontend at `/admin/products/` by signing in
+  with a Django staff or superuser account. Staff can add products, edit their
+  details and inventory, restore hidden products, or hide products from the
+  storefront; deletion keeps existing cart and order references intact.
 
 Cash on Delivery works normally. While `PAYMENT_DEMO_MODE` is enabled (by
 default only when Django `DEBUG` is enabled), GCash, Maya, card, online

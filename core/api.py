@@ -3,6 +3,7 @@
 from decimal import Decimal, InvalidOperation
 import uuid
 
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -10,11 +11,12 @@ from django.db import IntegrityError, transaction
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .authentication import issue_token
+from .authentication import AdminBearerTokenAuthentication, issue_admin_token
 from .models import (
     Cart,
     CartItem,
@@ -29,6 +31,7 @@ from .models import (
 from .serializers import (
     BuyNowSerializer,
     AccountSerializer,
+    AdminProductSerializer,
     AddCartItemSerializer,
     CartQuantitySerializer,
     CartSerializer,
@@ -52,6 +55,54 @@ def _error(message, code):
 def _cart_response(cart):
     cart = Cart.objects.prefetch_related("items__product").get(pk=cart.pk)
     return Response(CartSerializer(cart).data)
+
+
+class AdminLoginView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        username = request.data.get("username", "")
+        password = request.data.get("password", "")
+        if not isinstance(username, str) or not isinstance(password, str):
+            return _error("Enter a valid admin username and password.", status.HTTP_400_BAD_REQUEST)
+        user = authenticate(request, username=username.strip(), password=password)
+        if user is None or not user.is_active or not user.is_staff:
+            return _error("Invalid admin username or password.", status.HTTP_401_UNAUTHORIZED)
+        return Response({"access": issue_admin_token(user.pk)})
+
+
+class AdminProductListView(APIView):
+    authentication_classes = [AdminBearerTokenAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        products = Product.objects.all()
+        return Response(AdminProductSerializer(products, many=True).data)
+
+    def post(self, request):
+        serializer = AdminProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+        return Response(AdminProductSerializer(product).data, status=status.HTTP_201_CREATED)
+
+
+class AdminProductDetailView(APIView):
+    authentication_classes = [AdminBearerTokenAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, product_id):
+        product = get_object_or_404(Product, pk=product_id)
+        serializer = AdminProductSerializer(product, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+        return Response(AdminProductSerializer(product).data)
+
+    def delete(self, request, product_id):
+        product = get_object_or_404(Product, pk=product_id)
+        product.is_active = False
+        product.save(update_fields=["is_active", "updated_at"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RegisterView(APIView):

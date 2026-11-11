@@ -20,6 +20,9 @@ from django.contrib import admin
 from django.urls import path
 
 from .api import (
+    AdminLoginView,
+    AdminProductDetailView,
+    AdminProductListView,
     CartItemView,
     CartView,
     BuyNowView,
@@ -48,6 +51,9 @@ urlpatterns = [
     path("api/auth/logout/", LogoutView.as_view(), name="logout"),
     path("api/auth/me/", CurrentUserView.as_view(), name="current-user"),
     path("api/auth/change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("api/admin/auth/login/", AdminLoginView.as_view(), name="admin-login"),
+    path("api/admin/products/", AdminProductListView.as_view(), name="admin-product-list"),
+    path("api/admin/products/<str:product_id>/", AdminProductDetailView.as_view(), name="admin-product-detail"),
     path("api/categories/", CategoryListView.as_view(), name="category-list"),
     path("api/payment-methods/", PaymentMethodListView.as_view(), name="payment-method-list"),
     path("api/products/", ProductListView.as_view(), name="product-list"),

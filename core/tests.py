@@ -563,3 +563,78 @@ class ShoppingApiTests(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(order.status, Order.Status.CANCELLED)
         self.assertEqual(self.product.stock, depleted_stock + 2)
+
+
+class AdminProductApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = get_user_model().objects.create_superuser(
+            username="catalog-admin",
+            email="admin@example.com",
+            password="Admin-Password-2026!",
+        )
+
+    def admin_login(self):
+        return self.client.post(
+            "/api/admin/auth/login/",
+            {"username": "catalog-admin", "password": "Admin-Password-2026!"},
+            format="json",
+        )
+
+    def test_only_staff_can_log_in_and_manage_products(self):
+        self.assertIn(
+            self.client.get("/api/admin/products/").status_code,
+            (401, 403),
+        )
+        shopper = get_user_model().objects.create_user(
+            username="not-admin", password="Shopper-Password-2026!"
+        )
+        response = self.client.post(
+            "/api/admin/auth/login/",
+            {"username": shopper.username, "password": "Shopper-Password-2026!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 401)
+
+        login = self.admin_login()
+        self.assertEqual(login.status_code, 200, login.data)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
+        products = self.client.get("/api/admin/products/")
+        self.assertEqual(products.status_code, 200)
+        self.assertTrue(any(not product["is_active"] for product in products.data))
+
+    def test_admin_can_create_update_and_soft_delete_products(self):
+        login = self.admin_login()
+        self.assertEqual(login.status_code, 200, login.data)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
+        payload = {
+            "id": "admin-created-001",
+            "name": "Admin Test Lamp",
+            "description": "A test product for the admin dashboard.",
+            "sku": "ADMIN-TEST-001",
+            "price": "1250.00",
+            "category": "Home Decorations",
+            "stock": 12,
+            "thumbnail": "",
+            "image_url": "",
+            "is_active": True,
+        }
+        created = self.client.post("/api/admin/products/", payload, format="json")
+        self.assertEqual(created.status_code, 201, created.data)
+
+        updated = self.client.patch(
+            f"/api/admin/products/{payload['id']}/",
+            {"price": "1400.00", "stock": 8},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, 200, updated.data)
+        self.assertEqual(updated.data["price"], "1400.00")
+        self.assertEqual(updated.data["stock"], 8)
+
+        deleted = self.client.delete(f"/api/admin/products/{payload['id']}/")
+        self.assertEqual(deleted.status_code, 204)
+        self.assertFalse(Product.objects.get(pk=payload["id"]).is_active)
+        self.assertEqual(
+            self.client.get(f"/api/products/{payload['id']}/").status_code,
+            404,
+        )

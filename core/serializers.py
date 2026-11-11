@@ -123,6 +123,29 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class AdminProductSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(max_length=64)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "description",
+            "sku",
+            "price",
+            "category",
+            "stock",
+            "thumbnail",
+            "image_url",
+            "is_active",
+        ]
+
+    def update(self, instance, validated_data):
+        validated_data.pop("id", None)
+        return super().update(instance, validated_data)
+
+
 class WishlistItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_id = serializers.CharField(write_only=True)
