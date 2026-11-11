@@ -44,7 +44,8 @@ requests to Django at `http://127.0.0.1:8000`.
 - Open each product's details, including its unique product ID, SKU, category,
   description, price, stock, and image, or add it to the cart directly from its
   card. Buy-now checks out that product without changing the saved cart.
-- Register with a name, email, and password, then sign in.
+- Register with a name, username, email, and password, then sign in with the
+  username and password.
 - Update the customer profile and password, revoke the current sign-in on
   logout, add and manage delivery addresses from Account, and maintain a
   personal wishlist.
@@ -55,9 +56,9 @@ requests to Django at `http://127.0.0.1:8000`.
   order and payment status.
 - Send a support message for staff to manage in Django admin.
 - Manage catalog products from the frontend at `/admin/products/` by signing in
-  with a Django staff or superuser account. Staff can add products, edit their
-  details and inventory, restore hidden products, or hide products from the
-  storefront; deletion keeps existing cart and order references intact.
+  with a Django staff or superuser username and password. Staff can add products,
+  edit their details and inventory, restore hidden products, or hide products
+  from the storefront; deletion keeps existing cart and order references intact.
 
 Cash on Delivery works normally. While `PAYMENT_DEMO_MODE` is enabled (by
 default only when Django `DEBUG` is enabled), GCash, Maya, card, online
@@ -111,8 +112,8 @@ token returned by registration or login.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `POST` | `/api/auth/register/` | Create an account (`name`, `email`, `password`) |
-| `POST` | `/api/auth/login/` | Sign in (`email`, `password`) |
+| `POST` | `/api/auth/register/` | Create an account (`name`, `username`, `email`, `password`; username optional for legacy clients) |
+| `POST` | `/api/auth/login/` | Sign in with exactly one of `username` or `email`, plus `password` |
 | `POST` | `/api/auth/logout/` | Revoke the current customer bearer token |
 | `GET`, `PATCH` | `/api/auth/me/` | Get or update the signed-in profile (`name`) |
 | `POST` | `/api/auth/change-password/` | Change password (`current_password`, `new_password`) |

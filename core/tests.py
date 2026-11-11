@@ -123,6 +123,43 @@ class ShoppingApiTests(TestCase):
         self.assertIn("access", login.data)
         self.assertEqual(login.data["user"]["id"], self.user_id)
 
+    def test_customer_can_register_and_sign_in_with_username(self):
+        registration = self.client.post(
+            "/api/auth/register/",
+            {
+                "name": "Username Shopper",
+                "username": "username-shopper",
+                "email": "username-shopper@example.com",
+                "password": "LivingSpace-Valid-2026!",
+            },
+            format="json",
+        )
+        self.assertEqual(registration.status_code, 201, registration.data)
+        shopper = get_user_model().objects.get(
+            shopper_profile__email="username-shopper@example.com"
+        )
+        self.assertEqual(shopper.username, "username-shopper")
+
+        login = self.client.post(
+            "/api/auth/login/",
+            {"username": "USERNAME-SHOPPER", "password": "LivingSpace-Valid-2026!"},
+            format="json",
+        )
+        self.assertEqual(login.status_code, 200, login.data)
+        self.assertEqual(login.data["user"]["id"], shopper.pk)
+
+        duplicate_username = self.client.post(
+            "/api/auth/register/",
+            {
+                "name": "Duplicate Username",
+                "username": "Username-Shopper",
+                "email": "duplicate-username@example.com",
+                "password": "LivingSpace-Valid-2026!",
+            },
+            format="json",
+        )
+        self.assertEqual(duplicate_username.status_code, 400)
+
     def test_registration_passwords_and_authentication_errors(self):
         duplicate = self.client.post(
             "/api/auth/register/",
@@ -577,7 +614,7 @@ class AdminProductApiTests(TestCase):
     def admin_login(self):
         return self.client.post(
             "/api/admin/auth/login/",
-            {"username": "catalog-admin", "password": "Admin-Password-2026!"},
+            {"email": "admin@example.com", "password": "Admin-Password-2026!"},
             format="json",
         )
 
@@ -591,13 +628,19 @@ class AdminProductApiTests(TestCase):
         )
         response = self.client.post(
             "/api/admin/auth/login/",
-            {"username": shopper.username, "password": "Shopper-Password-2026!"},
+            {"email": "shopper@example.com", "password": "Shopper-Password-2026!"},
             format="json",
         )
         self.assertEqual(response.status_code, 401)
 
         login = self.admin_login()
         self.assertEqual(login.status_code, 200, login.data)
+        username_login = self.client.post(
+            "/api/admin/auth/login/",
+            {"username": "catalog-admin", "password": "Admin-Password-2026!"},
+            format="json",
+        )
+        self.assertEqual(username_login.status_code, 200, username_login.data)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
         products = self.client.get("/api/admin/products/")
         self.assertEqual(products.status_code, 200)

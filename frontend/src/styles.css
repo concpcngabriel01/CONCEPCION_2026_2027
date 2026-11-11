@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+:root {
+  scrollbar-color: #b7c3b6 transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #b7c3b6;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #879b89;
+  background-clip: padding-box;
+}
+
 :where(.store-shell) button,
 :where(.store-shell) a,
 :where(.store-shell) input,
@@ -318,6 +344,7 @@
 
 .admin-search input,
 .admin-login-form input,
+.admin-login-form select,
 .admin-product-form input:not([type="checkbox"]),
 .admin-product-form textarea {
   width: 100%;
@@ -333,6 +360,7 @@
 
 .admin-search input:focus,
 .admin-login-form input:focus,
+.admin-login-form select:focus,
 .admin-product-form input:focus,
 .admin-product-form textarea:focus {
   border-color: #91a995;

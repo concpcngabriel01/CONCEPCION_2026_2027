@@ -232,11 +232,12 @@ function ThemeIcon({ darkMode }) {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(() => (
-    window.location.pathname === "/shop" ? "shop" :
-      window.location.pathname === "/checkout" ? "checkout" :
-        window.location.pathname === "/admin/products" ? "admin" : "home"
-  ));
+  const [currentPage, setCurrentPage] = useState(() => {
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    return path === "/shop" ? "shop" :
+      path === "/checkout" ? "checkout" :
+        path === "/admin/products" ? "admin" : "home";
+  });
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState(PRODUCT_CATEGORIES);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -376,7 +377,7 @@ function App() {
 
   useEffect(() => {
     const handleHistoryChange = () => {
-      const path = window.location.pathname;
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
       const page = path === "/shop" ? "shop" : path === "/checkout" ? "checkout" :
         path === "/admin/products" ? "admin" : "home";
       setCurrentPage(page);
@@ -494,17 +495,45 @@ function App() {
     setAuthBusy(true);
     setAuthError("");
     const form = new FormData(event.currentTarget);
+    const username = String(form.get("username") || "").trim();
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "");
-    const body = { email, password };
-    if (authMode === "register") body.name = String(form.get("name") || "").trim();
+    const body = { password };
+    if (authMode === "register") {
+      body.name = String(form.get("name") || "").trim();
+      body.username = username;
+      body.email = email;
+    } else {
+      body.username = username;
+    }
     try {
+      if (authMode === "login") {
+        try {
+          const adminResult = await api("/api/admin/auth/login/", {
+            method: "POST",
+            body: JSON.stringify({ username, password }),
+          });
+          if (!adminResult?.access) {
+            throw new Error("The server did not return an admin token.");
+          }
+          localStorage.setItem("living_space_admin_token", adminResult.access);
+          setAuthOpen(false);
+          navigateTo("admin");
+          return;
+        } catch (error) {
+          if (error.status !== 401) throw error;
+        }
+      }
+
       let result = await api(`/api/auth/${authMode === "register" ? "register" : "login"}/`, {
         method: "POST",
         body: JSON.stringify(body),
       });
       if (authMode === "register" && !(result?.token ?? result?.access ?? result?.key)) {
-        result = await api("/api/auth/login/", { method: "POST", body: JSON.stringify({ email, password }) });
+        result = await api("/api/auth/login/", {
+          method: "POST",
+          body: JSON.stringify({ username, password }),
+        });
       }
       const nextToken = result?.token ?? result?.access ?? result?.key;
       if (!nextToken) throw new Error("The server did not return an authentication token.");
@@ -848,7 +877,6 @@ function App() {
         <nav className={styles.mainNav} aria-label="Main navigation">
           <button aria-current={currentPage === "home" ? "page" : undefined} className={currentPage === "home" ? "text-[#344b3b] max-[760px]:bg-[#dce8df]" : ""} onClick={() => navigateTo("home")} type="button">Home</button>
           <button aria-current={currentPage === "shop" ? "page" : undefined} className={currentPage === "shop" ? "text-[#344b3b] max-[760px]:bg-[#dce8df]" : ""} onClick={() => navigateTo("shop")} type="button">Shop</button>
-          <a className="text-[13px] text-[#5d6b60] hover:text-[#52765d]" href="/admin/products">Manage products</a>
         </nav>
         <div className={styles.headerActions}>
           <label className={styles.searchBox}>
@@ -1252,7 +1280,14 @@ function App() {
           {authError && <p className={styles.inlineError} role="alert">{authError}</p>}
           <form className={styles.authForm} onSubmit={submitAuth}>
             {authMode === "register" && <label>Full name<input name="name" autoComplete="name" required maxLength={100} /></label>}
-            <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+            {authMode === "register" ? (
+              <>
+                <label>Username<input name="username" autoComplete="username" required maxLength={150} /></label>
+                <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+              </>
+            ) : (
+              <label>Username<input name="username" autoComplete="username" required /></label>
+            )}
             <label>Password<input name="password" type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"} required minLength={authMode === "register" ? 8 : undefined} /></label>
             <button className={styles.checkoutButton} disabled={authBusy} type="submit">{authBusy ? "Please wait…" : authMode === "login" ? "Log in" : "Create account"}</button>
           </form>

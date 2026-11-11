@@ -62,13 +62,35 @@ class AdminLoginView(APIView):
     authentication_classes = []
 
     def post(self, request):
+        email = request.data.get("email", "")
         username = request.data.get("username", "")
         password = request.data.get("password", "")
-        if not isinstance(username, str) or not isinstance(password, str):
-            return _error("Enter a valid admin username and password.", status.HTTP_400_BAD_REQUEST)
-        user = authenticate(request, username=username.strip(), password=password)
-        if user is None or not user.is_active or not user.is_staff:
-            return _error("Invalid admin username or password.", status.HTTP_401_UNAUTHORIZED)
+        if (
+            not isinstance(email, str)
+            or not isinstance(username, str)
+            or not isinstance(password, str)
+            or bool(email.strip()) == bool(username.strip())
+        ):
+            return _error(
+                "Enter either an admin username or email and password.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+        candidates = User.objects.filter(is_active=True, is_staff=True)
+        if username.strip():
+            candidates = candidates.filter(username__iexact=username.strip())
+        else:
+            candidates = candidates.filter(email__iexact=email.strip())
+        user = None
+        for candidate in candidates:
+            user = authenticate(
+                request,
+                username=candidate.get_username(),
+                password=password,
+            )
+            if user is not None:
+                break
+        if user is None:
+            return _error("Invalid admin username/email or password.", status.HTTP_401_UNAUTHORIZED)
         return Response({"access": issue_admin_token(user.pk)})
 
 
@@ -124,7 +146,7 @@ class RegisterView(APIView):
             with transaction.atomic():
                 data = serializer.validated_data
                 user = User.objects.create_user(
-                    username=uuid.uuid4().hex,
+                    username=data.get("username") or uuid.uuid4().hex,
                     email=data["email"],
                     password=data["password"],
                 )
@@ -155,14 +177,22 @@ class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        profile = ShopperProfile.objects.select_related("user").filter(
-            email__iexact=serializer.validated_data["email"]
-        ).first()
-        user = profile.user if profile else None
+        credentials = serializer.validated_data
+        if credentials.get("email"):
+            profile = ShopperProfile.objects.select_related("user").filter(
+                email__iexact=credentials["email"]
+            ).first()
+            user = profile.user if profile else None
+        else:
+            user = User.objects.filter(
+                username__iexact=credentials["username"],
+                is_active=True,
+                shopper_profile__isnull=False,
+            ).first()
         if (
             user is None
             or not user.is_active
-            or not user.check_password(serializer.validated_data["password"])
+            or not user.check_password(credentials["password"])
         ):
             return _error("Invalid email or password.", status.HTTP_401_UNAUTHORIZED)
         return Response(

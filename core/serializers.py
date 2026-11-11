@@ -1,4 +1,5 @@
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from rest_framework import serializers
@@ -76,6 +77,12 @@ class SupportMessageSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, trim_whitespace=True)
+    username = serializers.CharField(
+        required=False,
+        max_length=150,
+        trim_whitespace=True,
+        validators=get_user_model()._meta.get_field("username").validators,
+    )
     email = serializers.EmailField(max_length=254)
     password = serializers.CharField(
         write_only=True, min_length=8, max_length=128, trim_whitespace=False
@@ -83,6 +90,11 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         return value.strip().lower()
+
+    def validate_username(self, value):
+        if get_user_model().objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
 
     def validate_password(self, value):
         try:
@@ -93,8 +105,14 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=254)
+    email = serializers.EmailField(max_length=254, required=False)
+    username = serializers.CharField(max_length=150, required=False, trim_whitespace=True)
     password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate(self, attrs):
+        if bool(attrs.get("email")) == bool(attrs.get("username")):
+            raise serializers.ValidationError("Enter either a username or an email address.")
+        return attrs
 
     def validate_email(self, value):
         return value.strip().lower()
